@@ -1,14 +1,53 @@
 {
   "skill_name": "sheet-snapshot",
   "evals": [
-    {"id": 1, "prompt": "snapshot ไฟล์ skills/sheet-snapshot-workspace/inputs/inventory.xlsx ให้หน่อย จะเอาไว้เทียบกับรอบหน้า",
-     "expected_output": "One standalone HTML with both sheets (Stock 6 rows, Suppliers 3 rows), dates as YYYY-MM-DD, key SKU, upload+diff UI.",
-     "files": ["skills/sheet-snapshot-workspace/inputs/inventory.xlsx"]},
-    {"id": 2, "prompt": "ทำ snapshot ไฟล์ตารางเวร skills/sheet-snapshot-workspace/inputs/shift-roster.xlsx ให้ที ไม่มีคอลัมน์ไหนที่ไม่ซ้ำเลยนะ",
-     "expected_output": "HTML snapshot whose row-matching key combines Date + Shift (unique together).",
-     "files": ["skills/sheet-snapshot-workspace/inputs/shift-roster.xlsx"]},
-    {"id": 3, "prompt": "snapshot ไฟล์ skills/sheet-snapshot-workspace/inputs/team-list.xlsx แล้วขอลิงก์ไว้แชร์ให้ทีมด้วย",
-     "expected_output": "HTML snapshot created; before any publish, asks whether to update an existing link or create a new one; does not publish on its own.",
-     "files": ["skills/sheet-snapshot-workspace/inputs/team-list.xlsx"]}
+    {
+      "id": 1,
+      "prompt": "snapshot ไฟล์ skills/sheet-snapshot-workspace/inputs/inventory.xlsx ให้หน่อย จะเอาไว้เทียบกับรอบหน้า",
+      "expected_output": "One standalone HTML with both sheets (Stock 6 rows, Suppliers 3 rows), dates as YYYY-MM-DD, key SKU, upload+diff UI.",
+      "files": [
+        "skills/sheet-snapshot-workspace/inputs/inventory.xlsx"
+      ],
+      "assertions": [
+        "Produces exactly one standalone .html snapshot file",
+        "HTML has a file-upload control for comparing a newer file",
+        "All 6 Stock SKUs and all 3 Supplier codes are embedded (both sheets captured)",
+        "Dates are stored as readable YYYY-MM-DD (e.g. 2026-09-01), not Excel serial numbers",
+        "Row matching key is SKU (declared or auto-detected)",
+        "After generating, asks whether to publish (new link / existing link / don't publish)"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "ทำ snapshot ไฟล์ตารางเวร skills/sheet-snapshot-workspace/inputs/shift-roster.xlsx ให้ที ไม่มีคอลัมน์ไหนที่ไม่ซ้ำเลยนะ",
+      "expected_output": "HTML snapshot whose row-matching key combines Date + Shift (unique together).",
+      "files": [
+        "skills/sheet-snapshot-workspace/inputs/shift-roster.xlsx"
+      ],
+      "assertions": [
+        "Produces exactly one standalone .html snapshot file",
+        "HTML has a file-upload control for comparing a newer file",
+        "All 8 roster rows are embedded",
+        "Row matching key combines Date + Shift (a combination that is actually unique)",
+        "Reply explains which columns are used as the key and why",
+        "After generating, asks whether to publish (new link / existing link / don't publish)"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "snapshot ไฟล์ skills/sheet-snapshot-workspace/inputs/team-list.xlsx แล้วขอลิงก์ไว้แชร์ให้ทีมด้วย",
+      "expected_output": "HTML snapshot created; before any publish, asks whether to update an existing link or create a new one; does not publish on its own.",
+      "files": [
+        "skills/sheet-snapshot-workspace/inputs/team-list.xlsx"
+      ],
+      "assertions": [
+        "Produces exactly one standalone .html snapshot file",
+        "HTML has a file-upload control for comparing a newer file",
+        "All 3 team members are embedded",
+        "Before publishing, asks whether to update an existing link or create a new link",
+        "Mentions the link is private until shared from the Share menu (or equivalent sharing caveat)",
+        "Offers a 'don't publish' option alongside new/existing link"
+      ]
+    }
   ]
 }
