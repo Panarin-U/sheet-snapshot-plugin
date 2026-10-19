@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>__PAGE_TITLE__</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root {
+  --bg: #f6f7f9; --surface: #ffffff; --surface-2: #f1f3f6; --border: #e2e5ea;
+  --text: #1b1f24; --muted: #646d78; --accent: #2457d6; --accent-soft: #e6edfc;
+  --add-bg: #e4f6ea; --add-fg: #17683a; --del-bg: #fde8e8; --del-fg: #a52222;
+  --mod-bg: #fff4d6; --mod-fg: #855d00; --shadow: 0 1px 2px rgba(16,24,40,.06);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111418; --surface: #191d23; --surface-2: #20252c; --border: #2d333b;
+    --text: #e6e9ed; --muted: #949ca7; --accent: #7aa2ff; --accent-soft: #1d2a47;
+    --add-bg: #12301f; --add-fg: #7fdba0; --del-bg: #3a1717; --del-fg: #ff9a9a;
+    --mod-bg: #3a2f10; --mod-fg: #f2cc66; --shadow: none;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #111418; --surface: #191d23; --surface-2: #20252c; --border: #2d333b;
+  --text: #e6e9ed; --muted: #949ca7; --accent: #7aa2ff; --accent-soft: #1d2a47;
+  --add-bg: #12301f; --add-fg: #7fdba0; --del-bg: #3a1717; --del-fg: #ff9a9a;
+  --mod-bg: #3a2f10; --mod-fg: #f2cc66; --shadow: none;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text);
+  font: 14px/1.55 "IBM Plex Sans Thai", system-ui, -apple-system, sans-serif; }
+.wrap { max-width: 1200px; margin: 0 auto; padding: 28px 16px 64px; }
+header h1 { font-size: 22px; font-weight: 600; margin: 0 0 4px; }
+.meta { color: var(--muted); font-size: 13px; display: flex; flex-wrap: wrap; gap: 4px 16px; }
+.meta b { color: var(--text); font-weight: 500; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+  box-shadow: var(--shadow); padding: 16px; margin-top: 16px; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.label { color: var(--muted); font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: .04em; margin-right: 4px; }
+.seg { display: inline-flex; background: var(--surface-2); border-radius: 8px; padding: 3px; gap: 2px; }
+.seg button { border: 0; background: transparent; color: var(--muted); font: inherit; font-weight: 500;
+  padding: 6px 12px; border-radius: 6px; cursor: pointer; }
+.seg button[aria-selected="true"] { background: var(--surface); color: var(--text); box-shadow: var(--shadow); }
+.seg button:disabled { opacity: .45; cursor: default; }
+.chip { border: 1px solid var(--border); background: var(--surface); color: var(--text); font: inherit; font-size: 13px;
+  border-radius: 999px; padding: 3px 11px; cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); font-weight: 500; }
+.btn { border: 1px solid var(--border); background: var(--surface); color: var(--text); font: inherit; font-weight: 500;
+  border-radius: 8px; padding: 7px 14px; cursor: pointer; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn:hover { filter: brightness(.97); }
+input[type=search], select { font: inherit; color: var(--text); background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; padding: 6px 10px; min-width: 0; }
+.drop { border: 1.5px dashed var(--border); border-radius: 10px; padding: 22px 16px; text-align: center; color: var(--muted); cursor: pointer; }
+.drop.over { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+.drop strong { color: var(--text); }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
+.stat { border-radius: 8px; padding: 10px 12px; background: var(--surface-2); }
+.stat .n { font-size: 24px; font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1.2; }
+.stat .t { font-size: 12px; color: var(--muted); }
+.stat.add .n { color: var(--add-fg); } .stat.del .n { color: var(--del-fg); } .stat.mod .n { color: var(--mod-fg); }
+.notice { border-radius: 8px; padding: 8px 12px; font-size: 13px; margin-top: 10px; background: var(--surface-2); }
+.notice.warn { background: var(--mod-bg); color: var(--mod-fg); }
+.tbl-wrap { overflow: auto; max-height: 70vh; border: 1px solid var(--border); border-radius: 8px; margin-top: 12px; }
+table { border-collapse: collapse; width: 100%; font-size: 13px; }
+th, td { padding: 7px 10px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; white-space: nowrap; }
+th { position: sticky; top: 0; background: var(--surface-2); font-weight: 600; z-index: 1; }
+th.key::after { content: " 🔑"; font-size: 11px; }
+th.col-add { color: var(--add-fg); } th.col-del { color: var(--del-fg); text-decoration: line-through; }
+td.num { font-variant-numeric: tabular-nums; font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 12.5px; }
+td.idx { color: var(--muted); width: 1%; }
+tr.s-add td { background: var(--add-bg); }
+tr.s-del td { background: var(--del-bg); color: var(--del-fg); }
+tr.s-del td:not(.idx) { text-decoration: line-through; }
+td.c-mod { background: var(--mod-bg); }
+td.c-mod .old { color: var(--del-fg); text-decoration: line-through; display: block; font-size: 12px; }
+td.c-mod .new { color: var(--text); font-weight: 500; }
+.badge { display: inline-block; font-size: 11px; font-weight: 600; border-radius: 4px; padding: 1px 6px; }
+.badge.add { background: var(--add-bg); color: var(--add-fg); } .badge.del { background: var(--del-bg); color: var(--del-fg); }
+.badge.mod { background: var(--mod-bg); color: var(--mod-fg); } .badge.same { color: var(--muted); }
+.empty { padding: 24px; text-align: center; color: var(--muted); }
+.spacer { flex: 1; }
+.search { flex: 1 1 200px; max-width: 320px; min-width: 160px; }
+.hidden { display: none !important; }
+@media (max-width: 600px) { .wrap { padding-top: 18px; } header h1 { font-size: 19px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1 id="title"></h1>
+    <div class="meta">
+      <span>ต้นทาง <b id="src"></b></span>
+      <span>Snapshot เมื่อ <b id="taken"></b></span>
+      <span id="cmpMeta" class="hidden">เทียบกับ <b id="cmpName"></b></span>
+    </div>
+  </header>
+
+  <div class="card">
+    <div class="row">
+      <div class="seg" role="tablist" id="viewTabs">
+        <button role="tab" data-view="snap" aria-selected="true">ข้อมูล Snapshot</button>
+        <button role="tab" data-view="diff" aria-selected="false" disabled>ผลเปรียบเทียบ</button>
+      </div>
+      <div class="spacer"></div>
+      <div class="row" id="sheetRow"><span class="label">Sheet</span><select id="sheetSel"></select></div>
+    </div>
+    <div class="row" style="margin-top:12px">
+      <span class="label">จับคู่แถวด้วย</span>
+      <span class="row" id="keyChips"></span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="drop" id="drop" tabindex="0" role="button">
+      <strong>วางไฟล์ .xlsx / .csv ที่นี่</strong> หรือคลิกเพื่อเลือกไฟล์มาเปรียบเทียบกับ snapshot
+      <input type="file" id="file" accept=".xlsx,.xlsm,.xls,.csv" hidden>
+    </div>
+    <div class="row hidden" id="upSheetRow" style="margin-top:10px">
+      <span class="label">Sheet ในไฟล์ใหม่</span><select id="upSheetSel"></select>
+    </div>
+  </div>
+
+  <section id="snapView" class="card">
+    <div class="row">
+      <input type="search" id="q1" placeholder="ค้นหาในตาราง…" class="search">
+      <span class="spacer"></span><span class="meta" id="snapCount"></span>
+    </div>
+    <div class="tbl-wrap"><table id="snapTbl"></table></div>
+  </section>
+
+  <section id="diffView" class="hidden">
+    <div class="card">
+      <div class="stats" id="stats"></div>
+      <div id="notices"></div>
+    </div>
+    <div class="card">
+      <div class="row">
+        <input type="search" id="q2" placeholder="ค้นหาในผลเปรียบเทียบ…" class="search">
+        <label class="row" style="gap:6px;color:var(--muted)"><input type="checkbox" id="onlyChanged" checked> แสดงเฉพาะที่เปลี่ยน</label>
+        <span class="spacer"></span>
+      </div>
+      <div class="tbl-wrap"><table id="diffTbl"></table></div>
+    </div>
+  </section>
+</div>
+
+<script id="snapshot" type="application/json">__SNAPSHOT_JSON__</script>
+<script>
+const SNAP = JSON.parse(document.getElementById('snapshot').textContent);
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+const state = { sheet: 0, view: 'snap', keys: {}, upload: null, upSheet: {}, diff: null };
+
+/* ---------- value normalisation (used for comparing, not display) ---------- */
+function norm(v) {
+  if (v === null || v === undefined) return '';
+  if (typeof v === 'boolean') return v ? 'TRUE' : 'FALSE';
+  if (typeof v === 'number') return String(+v.toPrecision(12));
+  let s = String(v).replace(/\s+/g, ' ').trim();
+  if (/^-?\d+(\.\d+)?$/.test(s)) return String(+(+s).toPrecision(12));
+  return s;
+}
+const show = v => (v === null || v === undefined) ? '' : String(v);
+const isNum = v => typeof v === 'number' || /^-?\d+(\.\d+)?$/.test(String(v ?? '').trim());
+
+/* ---------- key detection ---------- */
+function guessKey(t) {
+  if (SNAP.key && SNAP.key.every(k => t.headers.includes(k))) return SNAP.key.slice();
+  const unique = i => {
+    const seen = new Set();
+    for (const r of t.rows) { const v = norm(r[i]); if (!v || seen.has(v)) return false; seen.add(v); }
+    return t.rows.length > 0;
+  };
+  const idLike = /(^id$|[_\s]id$|^id[_\s]|รหัส|code|key|no\.?$|email|อีเมล)/i;
+  const pref = t.headers.findIndex((h, i) => idLike.test(h) && unique(i));
+  if (pref >= 0) return [t.headers[pref]];
+  const any = t.headers.findIndex((h, i) => unique(i));
+  return any >= 0 ? [t.headers[any]] : [];
+}
+
+/* ---------- read uploaded workbook ---------- */
+function pad(n) { return String(n).padStart(2, '0'); }
+function cellValue(c) {
+  if (!c) return null;
+  if (c.t === 'n' && c.z && XLSX.SSF.is_date(c.z)) {
+    const d = XLSX.SSF.parse_date_code(c.v);
+    const date = `${d.y}-${pad(d.m)}-${pad(d.d)}`;
+    return (d.H || d.M || d.S) ? `${date} ${pad(d.H)}:${pad(d.M)}:${pad(Math.round(d.S))}` : date;
+  }
+  if (c.t === 'b') return c.v;
+  if (c.t === 'e') return c.w ?? null;
+  return c.v === '' ? null : c.v;
+}
+function sheetToTable(name, ws) {
+  if (!ws || !ws['!ref']) return { name, headers: [], rows: [] };
+  const R = XLSX.utils.decode_range(ws['!ref']);
+  const grid = [];
+  for (let r = R.s.r; r <= R.e.r; r++) {
+    const row = [];
+    for (let c = R.s.c; c <= R.e.c; c++) row.push(cellValue(ws[XLSX.utils.encode_cell({ r, c })]));
+    if (row.some(v => v !== null && v !== '')) grid.push(row);
+  }
+  if (!grid.length) return { name, headers: [], rows: [] };
+  let last = 0;
+  grid.forEach(row => row.forEach((v, i) => { if (v !== null && v !== '') last = Math.max(last, i); }));
+  const headers = grid[0].slice(0, last + 1).map((h, i) => h === null ? `Column ${i + 1}` : String(h).trim());
+  return { name, headers, rows: grid.slice(1).map(r => r.slice(0, last + 1)) };
+}
+async function readUpload(file) {
+  const buf = await file.arrayBuffer();
+  const isCsv = /\.csv$/i.test(file.name);
+  const wb = XLSX.read(buf, { type: 'array', cellNF: true, raw: isCsv, codepage: 65001 });
+  return { name: file.name, sheets: wb.SheetNames.map(n => sheetToTable(n, wb.Sheets[n])) };
+}
+
+/* ---------- diff ---------- */
+function computeDiff(a, b, keys) {
+  const aCols = a.headers, bCols = b.headers;
+  const common = aCols.filter(h => bCols.includes(h));
+  const removedCols = aCols.filter(h => !bCols.includes(h));
+  const addedCols = bCols.filter(h => !aCols.includes(h));
+  const cols = [...aCols, ...addedCols];
+  const toObj = (t, r) => Object.fromEntries(t.headers.map((h, i) => [h, r[i] ?? null]));
+  const dupes = new Set();
+
+  const index = (t) => {
+    const ki = keys.map(k => t.headers.indexOf(k));
+    const map = new Map(), order = [];
+    t.rows.forEach((r, n) => {
+      let k = keys.length ? ki.map(i => norm(i >= 0 ? r[i] : null)).join(' | ') : `#${n + 1}`;
+      if (map.has(k)) { dupes.add(k); let j = 2; while (map.has(`${k} (${j})`)) j++; k = `${k} (${j})`; }
+      map.set(k, toObj(t, r)); order.push(k);
+    });
+    return { map, order };
+  };
+  const A = index(a), B = index(b);
+  const out = [];
+  const bPos = new Map(B.order.map((k, i) => [k, i]));
+
+  B.order.forEach((k, i) => {
+    const nr = B.map.get(k), or = A.map.get(k);
+    if (!or) { out.push({ key: k, status: 'add', row: nr, pos: i, sub: 0 }); return; }
+    const changed = common.filter(h => norm(or[h]) !== norm(nr[h]));
+    out.push({ key: k, status: changed.length ? 'mod' : 'same', row: nr, old: or, changed: new Set(changed), pos: i, sub: 0 });
+  });
+  let anchor = -1, sub = 0;
+  A.order.forEach(k => {
+    if (bPos.has(k)) { anchor = bPos.get(k); sub = 0; return; }
+    out.push({ key: k, status: 'del', row: A.map.get(k), pos: anchor + 0.5, sub: ++sub });
+  });
+  out.sort((x, y) => x.pos - y.pos || x.sub - y.sub);
+
+  const count = s => out.filter(r => r.status === s).length;
+  return { rows: out, cols, removedCols, addedCols, dupes: [...dupes],
+    stats: { add: count('add'), del: count('del'), mod: count('mod'), same: count('same'),
+             cells: out.reduce((n, r) => n + (r.changed ? r.changed.size : 0), 0) } };
+}
+
+/* ---------- rendering ---------- */
+const curSnap = () => SNAP.sheets[state.sheet];
+const curKeys = () => state.keys[state.sheet] ??= guessKey(curSnap());
+function curUpload() {
+  if (!state.upload) return null;
+  const ups = state.upload.sheets;
+  if (state.upSheet[state.sheet] === undefined) {
+    let i = ups.findIndex(s => s.name === curSnap().name);
+    if (i < 0) i = ups.length === 1 || SNAP.sheets.length === 1 ? 0 : -1;
+    state.upSheet[state.sheet] = i;
+  }
+  return ups[state.upSheet[state.sheet]] || null;
+}
+const match = (q, vals) => !q || vals.some(v => show(v).toLowerCase().includes(q));
+
+function renderKeyChips() {
+  const keys = curKeys();
+  $('keyChips').innerHTML = curSnap().headers.map(h =>
+    `<button class="chip" aria-pressed="${keys.includes(h)}" data-h="${esc(h)}">${esc(h)}</button>`).join('') +
+    (keys.length ? '' : `<span class="meta">ไม่ได้เลือก key: เทียบตามลำดับแถว</span>`);
+}
+
+function renderSnap() {
+  const t = curSnap(), keys = curKeys(), q = $('q1').value.trim().toLowerCase();
+  const rows = t.rows.filter(r => match(q, r));
+  $('snapCount').textContent = `${rows.length} / ${t.rows.length} แถว · ${t.headers.length} คอลัมน์`;
+  if (!t.headers.length) { $('snapTbl').innerHTML = '<tr><td class="empty">Sheet ว่าง</td></tr>'; return; }
+  $('snapTbl').innerHTML =
+    `<thead><tr><th>#</th>${t.headers.map(h => `<th class="${keys.includes(h) ? 'key' : ''}">${esc(h)}</th>`).join('')}</tr></thead><tbody>` +
+    (rows.length ? rows.map((r) => `<tr><td class="idx">${t.rows.indexOf(r) + 1}</td>${t.headers.map((h, i) =>
+      `<td class="${isNum(r[i]) ? 'num' : ''}">${esc(show(r[i]))}</td>`).join('')}</tr>`).join('')
+      : `<tr><td class="empty" colspan="${t.headers.length + 1}">ไม่พบข้อมูล</td></tr>`) + '</tbody>';
+}
+
+function renderDiff() {
+  const up = curUpload();
+  const tabBtn = document.querySelector('[data-view=diff]');
+  tabBtn.disabled = !state.upload;
+  if (!up) {
+    state.diff = null;
+    $('stats').innerHTML = '';
+    $('notices').innerHTML = state.upload ? `<div class="notice warn">ไม่พบ sheet "${esc(curSnap().name)}" ในไฟล์ใหม่ เลือก sheet ที่จะเทียบด้านบน</div>` : '';
+    $('diffTbl').innerHTML = '';
+    return;
+  }
+  const keys = curKeys();
+  const d = state.diff = computeDiff(curSnap(), up, keys);
+  const s = d.stats;
+  $('stats').innerHTML = `
+    <div class="stat add"><div class="n">${s.add}</div><div class="t">แถวที่เพิ่ม</div></div>
+    <div class="stat del"><div class="n">${s.del}</div><div class="t">แถวที่ถูกลบ</div></div>
+    <div class="stat mod"><div class="n">${s.mod}</div><div class="t">แถวที่แก้ไข (${s.cells} cell)</div></div>
+    <div class="stat"><div class="n">${s.same}</div><div class="t">เหมือนเดิม</div></div>`;
+  const notes = [];
+  if (!s.add && !s.del && !s.mod && !d.addedCols.length && !d.removedCols.length)
+    notes.push(`<div class="notice">✅ ข้อมูลตรงกับ snapshot ทุก cell</div>`);
+  if (d.addedCols.length) notes.push(`<div class="notice">คอลัมน์ใหม่: <b>${d.addedCols.map(esc).join(', ')}</b></div>`);
+  if (d.removedCols.length) notes.push(`<div class="notice warn">คอลัมน์ที่หายไป: <b>${d.removedCols.map(esc).join(', ')}</b></div>`);
+  const missingKey = keys.filter(k => !up.headers.includes(k));
+  if (missingKey.length) notes.push(`<div class="notice warn">ไฟล์ใหม่ไม่มีคอลัมน์ key: <b>${missingKey.map(esc).join(', ')}</b> ผลการจับคู่อาจไม่ถูกต้อง</div>`);
+  if (d.dupes.length) notes.push(`<div class="notice warn">พบ key ซ้ำ ${d.dupes.length} ค่า (เช่น <b>${esc(d.dupes[0])}</b>) ควรเลือก key เพิ่มให้ไม่ซ้ำ</div>`);
+  if (!keys.length) notes.push(`<div class="notice">กำลังเทียบตามลำดับแถว ถ้ามีการแทรกหรือเรียงแถวใหม่ ผลจะคลาดเคลื่อน ควรเลือก key</div>`);
+  $('notices').innerHTML = notes.join('');
+
+  const only = $('onlyChanged').checked, q = $('q2').value.trim().toLowerCase();
+  const rows = d.rows.filter(r => (!only || r.status !== 'same') && match(q, Object.values(r.row)));
+  const label = { add: 'เพิ่ม', del: 'ลบ', mod: 'แก้ไข', same: '—' };
+  const thCls = h => [keys.includes(h) && 'key', d.addedCols.includes(h) && 'col-add', d.removedCols.includes(h) && 'col-del'].filter(Boolean).join(' ');
+  $('diffTbl').innerHTML =
+    `<thead><tr><th>สถานะ</th>${d.cols.map(h => `<th class="${thCls(h)}">${esc(h)}</th>`).join('')}</tr></thead><tbody>` +
+    (rows.length ? rows.map(r => `<tr class="s-${r.status}"><td class="idx"><span class="badge ${r.status}">${label[r.status]}</span></td>` +
+      d.cols.map(h => {
+        const v = r.row[h];
+        if (r.changed && r.changed.has(h))
+          return `<td class="c-mod ${isNum(v) ? 'num' : ''}"><span class="old">${esc(show(r.old[h])) || '(ว่าง)'}</span><span class="new">${esc(show(v)) || '(ว่าง)'}</span></td>`;
+        return `<td class="${isNum(v) ? 'num' : ''}">${esc(show(v))}</td>`;
+      }).join('') + '</tr>').join('')
+      : `<tr><td class="empty" colspan="${d.cols.length + 1}">${only ? 'ไม่มีแถวที่เปลี่ยน' : 'ไม่พบข้อมูล'}</td></tr>`) + '</tbody>';
+}
+
+function renderUpSheetSel() {
+  if (!state.upload) return;
+  $('upSheetRow').classList.toggle('hidden', state.upload.sheets.length < 2 && SNAP.sheets.length < 2);
+  $('upSheetSel').innerHTML = `<option value="-1">— ไม่เทียบ —</option>` +
+    state.upload.sheets.map((s, i) => `<option value="${i}">${esc(s.name)}</option>`).join('');
+  curUpload();
+  $('upSheetSel').value = state.upSheet[state.sheet];
+}
+
+function render() {
+  renderKeyChips(); renderSnap(); renderUpSheetSel(); renderDiff();
+  document.querySelectorAll('#viewTabs button').forEach(b => b.setAttribute('aria-selected', b.dataset.view === state.view));
+  $('snapView').classList.toggle('hidden', state.view !== 'snap');
+  $('diffView').classList.toggle('hidden', state.view !== 'diff');
+}
+
+/* ---------- wiring ---------- */
+async function handleFile(file) {
+  if (!file) return;
+  if (typeof XLSX === 'undefined') { alert('โหลดไลบรารี SheetJS ไม่สำเร็จ (ต้องต่ออินเทอร์เน็ต)'); return; }
+  try {
+    state.upload = await readUpload(file); state.upSheet = {}; state.view = 'diff';
+    $('cmpName').textContent = file.name; $('cmpMeta').classList.remove('hidden');
+    $('drop').querySelector('strong').textContent = `📄 ${file.name}`;
+    render();
+  } catch (e) { alert('อ่านไฟล์ไม่สำเร็จ: ' + e.message); }
+}
+
+$('title').textContent = SNAP.title;
+$('src').textContent = SNAP.source;
+$('taken').textContent = new Date(SNAP.takenAt).toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' });
+$('sheetSel').innerHTML = SNAP.sheets.map((s, i) => `<option value="${i}">${esc(s.name)}</option>`).join('');
+$('sheetRow').classList.toggle('hidden', SNAP.sheets.length < 2);
+$('sheetSel').onchange = e => { state.sheet = +e.target.value; render(); };
+$('upSheetSel').onchange = e => { state.upSheet[state.sheet] = +e.target.value; render(); };
+$('viewTabs').onclick = e => { const b = e.target.closest('button'); if (b && !b.disabled) { state.view = b.dataset.view; render(); } };
+$('keyChips').onclick = e => {
+  const b = e.target.closest('.chip'); if (!b) return;
+  const keys = curKeys(), h = b.dataset.h, i = keys.indexOf(h);
+  i >= 0 ? keys.splice(i, 1) : keys.push(h);
+  render();
+};
+$('q1').oninput = renderSnap;
+$('q2').oninput = renderDiff;
+$('onlyChanged').onchange = renderDiff;
+const drop = $('drop');
+drop.onclick = () => $('file').click();
+drop.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); $('file').click(); } };
+$('file').onchange = e => handleFile(e.target.files[0]);
+drop.ondragover = e => { e.preventDefault(); drop.classList.add('over'); };
+drop.ondragleave = () => drop.classList.remove('over');
+drop.ondrop = e => { e.preventDefault(); drop.classList.remove('over'); handleFile(e.dataTransfer.files[0]); };
+render();
+</script>
+</body>
+</html>

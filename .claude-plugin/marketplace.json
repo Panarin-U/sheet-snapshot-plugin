@@ -1,0 +1,7 @@
+{
+  "name": "sheet-snapshot-local",
+  "owner": { "name": "Panarin U." },
+  "plugins": [
+    { "name": "sheet-snapshot", "source": "./", "description": "Snapshot Excel / Google Sheets to HTML and diff uploads against it." }
+  ]
+}

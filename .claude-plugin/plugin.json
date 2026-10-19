@@ -1,0 +1,6 @@
+{
+  "name": "sheet-snapshot",
+  "version": "0.1.0",
+  "description": "Snapshot an Excel file or Google Sheet into a self-contained HTML page that renders the data and diffs it against a file uploaded later.",
+  "author": { "name": "Panarin U." }
+}

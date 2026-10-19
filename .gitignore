@@ -1,0 +1,8 @@
+# Snapshots generated while testing (may contain real data)
+output/
+*.snapshot.html
+# Eval runs (keep only the synthetic test inputs)
+skills/sheet-snapshot-workspace/*
+!skills/sheet-snapshot-workspace/inputs/
+.DS_Store
+__pycache__/

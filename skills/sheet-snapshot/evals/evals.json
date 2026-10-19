@@ -1,0 +1,14 @@
+{
+  "skill_name": "sheet-snapshot",
+  "evals": [
+    {"id": 1, "prompt": "snapshot ไฟล์ skills/sheet-snapshot-workspace/inputs/inventory.xlsx ให้หน่อย จะเอาไว้เทียบกับรอบหน้า",
+     "expected_output": "One standalone HTML with both sheets (Stock 6 rows, Suppliers 3 rows), dates as YYYY-MM-DD, key SKU, upload+diff UI.",
+     "files": ["skills/sheet-snapshot-workspace/inputs/inventory.xlsx"]},
+    {"id": 2, "prompt": "ทำ snapshot ไฟล์ตารางเวร skills/sheet-snapshot-workspace/inputs/shift-roster.xlsx ให้ที ไม่มีคอลัมน์ไหนที่ไม่ซ้ำเลยนะ",
+     "expected_output": "HTML snapshot whose row-matching key combines Date + Shift (unique together).",
+     "files": ["skills/sheet-snapshot-workspace/inputs/shift-roster.xlsx"]},
+    {"id": 3, "prompt": "snapshot ไฟล์ skills/sheet-snapshot-workspace/inputs/team-list.xlsx แล้วขอลิงก์ไว้แชร์ให้ทีมด้วย",
+     "expected_output": "HTML snapshot created; before any publish, asks whether to update an existing link or create a new one; does not publish on its own.",
+     "files": ["skills/sheet-snapshot-workspace/inputs/team-list.xlsx"]}
+  ]
+}
