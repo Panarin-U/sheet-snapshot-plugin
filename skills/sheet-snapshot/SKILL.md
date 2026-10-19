@@ -33,15 +33,23 @@ All comparison happens in the viewer's browser (SheetJS from cdnjs), no server n
 
    Default output name: `<file>-snapshot-<YYYYmmdd-HHMMSS>.html` in the current directory.
 
-4. **Show the result**: open the HTML for the user (browser pane / SendUserFile).
+4. **Show the result**: open the HTML for the user (browser pane / SendUserFile), then go straight to step 5.
 
-5. **Shareable link (when the user wants one)**: publish the generated HTML with the
-   Artifact tool. No capabilities are needed: upload and diff run entirely in the viewer's browser.
-
-   **ALWAYS ask before publishing**, with AskUserQuestion, even if the user already said
-   "publish" and even if this session published one before:
-   - **Update an existing link**: the snapshot replaces the page at a link people already have.
+5. **Ask whether to publish, every time**: as soon as the HTML is generated, ask with
+   AskUserQuestion, in the same turn, even if the user never mentioned a link. Users expect
+   the snapshot to end up on a shareable host, so never end the turn with only a local file
+   and no question. Ask this even if the user already said "publish" and even if this session
+   published one before. Options:
    - **Create a new link**: a separate page with its own URL.
+   - **Update an existing link**: the snapshot replaces the page at a link people already have.
+   - **Don't publish**: keep only the local HTML file.
+
+   Before asking, if the data looks internal or personal (names, emails, IDs, service accounts,
+   internal URLs/IPs, hostnames), say so in one line, so the user knows what viewers of the link
+   will see.
+
+   Publishing uses the Artifact tool. No capabilities are needed: upload and diff run entirely
+   in the viewer's browser.
 
    If they pick an existing link:
    - Use the URL they gave; if none, ask for it (or offer `action: "list"` to find it).
