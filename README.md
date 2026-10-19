@@ -5,7 +5,7 @@ Claude Code plugin: snapshot ไฟล์ Excel (.xlsx/.csv) หรือ Google
 
 ## ติดตั้ง
 ```bash
-claude plugin marketplace add <git-url-ของ-repo-นี้>
+claude plugin marketplace add Panarin-U/sheet-snapshot-plugin
 ```
 แล้วใน `claude` พิมพ์ `/plugin install sheet-snapshot@sheet-snapshot-local`
 
